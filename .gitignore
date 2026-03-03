@@ -1,0 +1,13 @@
+Dual Arena/Library/
+Dual Arena/Temp/
+Dual Arena/Logs/
+Dual Arena/Build/
+Dual Arena/obj/
+Dual Arena/UserSettings/
+Dual Arena/.vs/
+
+*.csproj
+*.sln
+*.user
+*.log
+*.vsconfig
