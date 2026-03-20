@@ -25,4 +25,4 @@ public class IdleBreathing : MonoBehaviour
         // floating up/down
         transform.position = originalPos + new Vector3(0, sin * floatAmount, 0);
     }
-}
+}   

@@ -59,6 +59,14 @@ public class LoginManager : MonoBehaviour
 
         string username = p1Dropdown.options[p1Dropdown.value].text;
 
+        // 🚨 NEW CHECK
+        if (p2Logged && GameData.player2Name == username)
+        {
+            p1Status.text = "Already used by Player 2!";
+            p1Status.color = Color.red;
+            return;
+        }
+
         if (userManager.Login(username, p1Password.text))
         {
             p1Status.text = "Logged in";
@@ -88,6 +96,14 @@ public class LoginManager : MonoBehaviour
 
         string username = p2Dropdown.options[p2Dropdown.value].text;
 
+        // 🚨 NEW CHECK
+        if (p1Logged && GameData.player1Name == username)
+        {
+            p2Status.text = "Already used by Player 1!";
+            p2Status.color = Color.red;
+            return;
+        }
+
         if (userManager.Login(username, p2Password.text))
         {
             p2Status.text = "Logged in";
@@ -106,13 +122,13 @@ public class LoginManager : MonoBehaviour
     }
 
     // ▶ START GAME
-    public void StartGame()
+    public void GoToMapSelection()
     {
         if (!p1Logged || !p2Logged)
         {
             if (!p1Logged)
             {
-                p1Status.text = "Login required";
+                p1Status.text = "❌ Login required";
                 p1Status.color = Color.red;
             }
 
@@ -129,14 +145,10 @@ public class LoginManager : MonoBehaviour
         {
             p1Status.text = "Same user!";
             p2Status.text = "Same user!";
-
-            p1Status.color = Color.red;
-            p2Status.color = Color.red;
-
             return;
         }
 
-        SceneManager.LoadScene("DualScene");
+        SceneManager.LoadScene("MapSelection");
     }
 
     // 🆕 REGISTER
@@ -178,7 +190,23 @@ public class LoginManager : MonoBehaviour
     {
         registerPanel.SetActive(false);
     }
-    
+    public void OnP1DropdownChanged()
+    {
+        p1Logged = false;
+        GameData.player1Name = "";
+
+        p1Status.text = "Not Logged In";
+        p1Status.color = Color.white;
+    }
+
+    public void OnP2DropdownChanged()
+    {
+        p2Logged = false;
+        GameData.player2Name = "";
+
+        p2Status.text = "Not Logged In";
+        p2Status.color = Color.white;
+    }
     // 🔙 BACK
     public void GoBack()
     {

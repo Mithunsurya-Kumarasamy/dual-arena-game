@@ -3,32 +3,53 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
+
 public class RoundManager : MonoBehaviour
 {
     public MoveSelectionManager moveManager;
+    public SpriteRenderer backgroundRenderer;
+    public Sprite[] maps;
     public Slider player1HPBar;
     public Slider player2HPBar;
 
+    public TextMeshProUGUI player1NameText;
+    public TextMeshProUGUI player2NameText;
+
     public TextMeshProUGUI player1HPText;
     public TextMeshProUGUI player2HPText;
-    public int player1HP = 100;
-    public int player2HP = 100;
+
     public TextMeshProUGUI statusText;
     public TextMeshProUGUI roundText;
 
+    public int player1HP = 100;
+    public int player2HP = 100;
+
     int roundNumber = 1;
+
+    void Start()
+    {
+        // Set names
+        player1NameText.text = GameData.player1Name;
+        player2NameText.text = GameData.player2Name;
+        backgroundRenderer.sprite = maps[GameData.selectedMap];
+        backgroundRenderer.transform.localScale = new Vector3(1.21f, 1.21f, 1f);
+        UpdateHPUI();
+    }
+
     void UpdateHPUI()
     {
         player1HPBar.value = player1HP;
         player2HPBar.value = player2HP;
 
-        player1HPText.text = "" + player1HP;
-        player2HPText.text = "" + player2HP;
+        player1HPText.text = player1HP.ToString();
+        player2HPText.text = player2HP.ToString();
     }
+
     public void StartSimulation()
     {
         StartCoroutine(SimulateRounds());
     }
+
     string MoveName(int move)
     {
         if (move == 0) return "Light";
@@ -36,71 +57,63 @@ public class RoundManager : MonoBehaviour
         if (move == 2) return "Block";
         return "Unknown";
     }
+
     IEnumerator SimulateRounds()
     {
         List<int> p1Moves = moveManager.player1Moves;
         List<int> p2Moves = moveManager.player2Moves;
+
         roundText.text = "ROUND " + roundNumber;
+
         for (int i = 0; i < 3; i++)
         {
-            Debug.Log("Round " + (i + 1) +
-            " | P1: " + MoveName(p1Moves[i]) +
-            " vs P2: " + MoveName(p2Moves[i]));
-            
-
             yield return StartCoroutine(ResolveRound(p1Moves[i], p2Moves[i]));
 
             if (player1HP <= 0 || player2HP <= 0)
-            {
-                Debug.Log("Fight ended early!");
                 break;
-            }
 
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(2f);
         }
+
+        // WIN CHECK
         if (player1HP <= 0)
         {
-            Debug.Log("PLAYER 2 WINS!");
-            statusText.text = "PLAYER 2 WINS!";
-            moveManager.simulationRunning = true; // lock game
+            statusText.text = GameData.player2Name + " WINS!";
+            moveManager.simulationRunning = true;
             yield break;
         }
         else if (player2HP <= 0)
         {
-            Debug.Log("PLAYER 1 WINS!");
-            statusText.text = "PLAYER 1 WINS!";
-            moveManager.simulationRunning = true; // lock game
+            statusText.text = GameData.player1Name + " WINS!";
+            moveManager.simulationRunning = true;
             yield break;
         }
 
-        // ONLY runs if no one died
-        Debug.Log("Simulation Finished");
-
+        // NEXT ROUND
         moveManager.player1Moves.Clear();
         moveManager.player2Moves.Clear();
 
         moveManager.simulationRunning = false;
-
         moveManager.ResetTurn();
+
         roundNumber++;
     }
 
     IEnumerator ResolveRound(int p1Move, int p2Move)
     {
-        // Step 1: Show moves
-        statusText.text =
-            "P1 uses " + MoveName(p1Move);
+        string p1 = GameData.player1Name;
+        string p2 = GameData.player2Name;
 
+        // Show moves
+        statusText.text = p1 + " uses " + MoveName(p1Move);
         yield return new WaitForSeconds(1f);
 
-        statusText.text +=
-            "\nP2 uses " + MoveName(p2Move);
-
+        statusText.text += "\n" + p2 + " uses " + MoveName(p2Move);
         yield return new WaitForSeconds(1f);
 
-        // Step 2: Resolve logic
         float roll = Random.Range(0f, 1f);
 
+        // BOTH BLOCK
         if (p1Move == 2 && p2Move == 2)
         {
             statusText.text += "\nBoth blocked!";
@@ -108,6 +121,7 @@ public class RoundManager : MonoBehaviour
             yield break;
         }
 
+        // SAME MOVE
         if (p1Move == p2Move)
         {
             if (Random.value < 0.5f)
@@ -168,26 +182,17 @@ public class RoundManager : MonoBehaviour
 
     void DamagePlayer1(int dmg)
     {
-        player1HP -= dmg;
+        player1HP = Mathf.Max(0, player1HP - dmg);
 
-        if (player1HP < 0)
-            player1HP = 0;
-
-        Debug.Log("Player1 took " + dmg + " damage.");
-        statusText.text += "\nPlayer1 loses " + dmg + " HP!";
-
+        statusText.text += "\n" + GameData.player1Name + " loses " + dmg + " HP!";
         UpdateHPUI();
     }
+
     void DamagePlayer2(int dmg)
     {
-        player2HP -= dmg;
+        player2HP = Mathf.Max(0, player2HP - dmg);
 
-        if (player2HP < 0)
-            player2HP = 0;
-
-        Debug.Log("Player2 took " + dmg + " damage.");
-        statusText.text += "\nPlayer2 loses " + dmg + " HP!";
-
+        statusText.text += "\n" + GameData.player2Name + " loses " + dmg + " HP!";
         UpdateHPUI();
     }
 }
