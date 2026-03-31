@@ -12,7 +12,10 @@ public class PlayerRow : MonoBehaviour
     bool isLocked = false;
 
     public PlayerSelectionManager manager;
-
+    public string GetSelectedUsername()
+    {
+        return dropdown.options[dropdown.value].text;
+    }
     public void SetPlayerNumber(int index)
     {
         playerIndex = index;

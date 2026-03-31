@@ -128,6 +128,7 @@ public class RoundManager : MonoBehaviour
 
     void ShowResult(string winnerName)
     {
+        Debug.Log("🔥 CALLING SaveTournamentMatch");
         StartCoroutine(api.SaveMatchWithRounds(
             GameData.player1Name,
             GameData.player2Name,
@@ -147,8 +148,14 @@ public class RoundManager : MonoBehaviour
         // 🔥 TOURNAMENT MODE LOGIC
         if (GameData.isTournamentMode)
         {
-            GameData.lastWinner = winnerName;
 
+            GameData.lastWinner = winnerName;
+            
+            StartCoroutine(api.SaveTournamentMatch(
+                GameData.currentTournamentID,
+                GameData.tournamentMatchIndex,
+                winnerName
+            ));
             playAgainButton.SetActive(false);
             mainMenuButton.SetActive(false);
             nextMatchButton.SetActive(true);
@@ -479,22 +486,22 @@ public class RoundManager : MonoBehaviour
         if (winner == 1)
         {
             if (p1Move == 1)
-            { 
+            {
                 DamagePlayer2(heavyDamage);
             }
             else if (p1Move == 0)
-            { 
+            {
                 DamagePlayer2(lightDamage);
             }
         }
         else if (winner == 2)
         {
             if (p2Move == 1)
-            { 
+            {
                 DamagePlayer1(heavyDamage);
             }
             else if (p2Move == 0)
-            { 
+            {
                 DamagePlayer1(lightDamage);
             }
         }

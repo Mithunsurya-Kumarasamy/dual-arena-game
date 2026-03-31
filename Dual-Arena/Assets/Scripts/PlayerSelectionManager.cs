@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
@@ -20,13 +21,36 @@ public class PlayerSelectionManager : MonoBehaviour
     {
         int count = GameData.tournamentPlayerCount;
         if (count == 0) count = 4;
+
         totalPlayers = count;
 
         GeneratePlayerRows(count);
 
-        nextButton.interactable = false; // ❌ disabled initially
+        StartCoroutine(LoadUsers()); // ✅ AFTER rows created
+
+        nextButton.interactable = false;
     }
 
+    IEnumerator LoadUsers()
+    {
+        yield return StartCoroutine(passwordManager.api.GetUsers());
+
+        Debug.Log("Users loaded: " + passwordManager.api.fetchedUsers.Count);
+
+        PopulateDropdowns(passwordManager.api.fetchedUsers);
+    }
+    void PopulateDropdowns(List<string> users)
+    {
+        foreach (Transform col in new[] { leftColumn, rightColumn })
+        {
+            foreach (Transform row in col)
+            {
+                PlayerRow r = row.GetComponentInChildren<PlayerRow>();
+                r.dropdown.ClearOptions();
+                r.dropdown.AddOptions(users);
+            }
+        }
+    }
     public void OnNextPressed()
     {
         GameData.tournamentPlayers = new List<string>(selectedPlayers);
@@ -79,12 +103,19 @@ public class PlayerSelectionManager : MonoBehaviour
     {
         registerPanel.SetActive(true);
     }
-
+    IEnumerator RefreshDelay()
+    {
+        yield return new WaitForSeconds(0.5f);
+        StartCoroutine(RefreshDelay());
+    }
     public void CloseRegister()
     {
         registerPanel.SetActive(false);
     }
-
+    public void RefreshUsers()
+    {
+        StartCoroutine(LoadUsers());
+    }
     public void GoBack()
     {
         SceneManager.LoadScene("TournamentScene"); // or previous scene
@@ -120,17 +151,7 @@ public class PlayerSelectionManager : MonoBehaviour
             row.passwordManager = passwordManager;
             row.dropdown.ClearOptions();
             row.manager = this;
-            row.dropdown.AddOptions(new List<string>
-            {
-                "Ashwin",
-                "Mithun",
-                "Player3",
-                "Player4",
-                "Player5",
-                "Player6",
-                "Player7",
-                "Player8"
-            });
+            row.dropdown.ClearOptions(); // leave empty
 
         }
     }

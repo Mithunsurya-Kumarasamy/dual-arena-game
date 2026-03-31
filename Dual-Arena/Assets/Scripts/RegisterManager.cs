@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-
+using System.Collections;
 public class RegisterManager : MonoBehaviour
 {
     public GameObject panel;
@@ -9,6 +9,7 @@ public class RegisterManager : MonoBehaviour
     public TMP_InputField passwordInput;
 
     public TextMeshProUGUI feedbackText;
+    public PlayerSelectionManager playerSelectionManager;
 
     public void Open()
     {
@@ -23,6 +24,8 @@ public class RegisterManager : MonoBehaviour
         panel.SetActive(false);
     }
 
+    public APIManager api;
+
     public void Register()
     {
         string username = usernameInput.text;
@@ -34,12 +37,22 @@ public class RegisterManager : MonoBehaviour
             return;
         }
 
-        // 🔥 TEMP LOGIC (later DB)
-        Debug.Log("Registered: " + username);
+        StartCoroutine(RegisterRoutine(username, password));
+    }
 
-        feedbackText.text = "Registered successfully!";
+    IEnumerator RegisterRoutine(string username, string password)
+    {
+        yield return StartCoroutine(api.Register(username, password));
 
-        // Optional: auto close
-        Invoke(nameof(Close), 1.5f);
+        if (api.lastRegisterSuccess)
+        {
+            feedbackText.text = "Registered successfully!";
+            Invoke(nameof(Close), 1.5f);
+             playerSelectionManager.RefreshUsers();
+        }
+        else
+        {
+            feedbackText.text = "Registration failed";
+        }
     }
 }

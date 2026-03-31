@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-
+using System.Collections;
 public class PasswordManager : MonoBehaviour
 {
     public GameObject panel;
@@ -15,12 +15,22 @@ public class PasswordManager : MonoBehaviour
         currentRow = row;
     }
 
+
+    public APIManager api;
+
     public void Confirm()
     {
         string entered = inputField.text;
+        string username = currentRow.GetSelectedUsername();
 
-        // TEMP password logic
-        if (entered == "1234")
+        StartCoroutine(LoginRoutine(username, entered));
+    }
+
+    IEnumerator LoginRoutine(string username, string password)
+    {
+        yield return StartCoroutine(api.Login(username, password));
+
+        if (api.lastLoginSuccess)
         {
             currentRow.LockPlayer();
             panel.SetActive(false);
@@ -30,7 +40,6 @@ public class PasswordManager : MonoBehaviour
             Debug.Log("Wrong password");
         }
     }
-
     public void Close()
     {
         panel.SetActive(false);

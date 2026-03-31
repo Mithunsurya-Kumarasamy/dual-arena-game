@@ -15,7 +15,7 @@ public class APIManager : MonoBehaviour
     public bool lastLoginSuccess;
     public bool lastRegisterSuccess;
     public string lastPlayerStatsJSON;
-    string baseURL = "http://10.1.232.184:3000";
+    string baseURL = "http://localhost:3000";
 
     public string lastMoveJSON;
     public string topPlayersJSON;
@@ -23,7 +23,28 @@ public class APIManager : MonoBehaviour
     public string mostPlayedMapJSON;
     public string winRateJSON;
 
+    public IEnumerator SaveTournamentMatch(int tournamentId, int matchIndex, string winner)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("tournamentId", tournamentId);
+        form.AddField("matchIndex", matchIndex);
+        form.AddField("winner", winner);
 
+        using (UnityEngine.Networking.UnityWebRequest www =
+            UnityEngine.Networking.UnityWebRequest.Post(baseURL + "/tournament/saveMatch", form))
+        {
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityEngine.Networking.UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("❌ SaveTournamentMatch failed: " + www.error);
+            }
+            else
+            {
+                Debug.Log("✅ Tournament match saved");
+            }
+        }
+    }
 
     public IEnumerator GetMostUsedMove(string username)
     {

@@ -15,4 +15,5 @@ public static class GameData
     public static int tournamentMatchIndex = 0;
     public static string tournamentWinner;
     public static bool tournamentFinished = false;
+    public static int currentTournamentID;
 }

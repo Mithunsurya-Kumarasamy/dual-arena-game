@@ -166,7 +166,7 @@ MonoBehaviour:
   leftColumn: {fileID: 1460838551}
   rightColumn: {fileID: 1865690987}
   playerRowPrefab: {fileID: 7224123942953749322, guid: 0042bc57fea2c1245a79f44c5f3f9aa6, type: 3}
-  registerPanel: {fileID: 9055691744808848963}
+  registerPanel: {fileID: 1656792147}
   selectedPlayers: []
   passwordManager: {fileID: 8350165152480955045}
   totalPlayers: 0
@@ -661,9 +661,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: LoginManager, Assembly-CSharp
-        m_MethodName: RegisterUser
+      - m_Target: {fileID: 1516611195}
+        m_TargetAssemblyTypeName: RegisterManager, Assembly-CSharp
+        m_MethodName: Register
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -794,9 +794,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: LoginManager, Assembly-CSharp
-        m_MethodName: CloseRegister
+      - m_Target: {fileID: 1516611195}
+        m_TargetAssemblyTypeName: RegisterManager, Assembly-CSharp
+        m_MethodName: Close
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1990,6 +1990,7 @@ RectTransform:
   - {fileID: 1460838551}
   - {fileID: 1865690987}
   - {fileID: 44184606}
+  - {fileID: 2068668778}
   - {fileID: 3744019492904754145}
   - {fileID: 1656792148}
   m_Father: {fileID: 0}
@@ -2010,6 +2011,7 @@ GameObject:
   - component: {fileID: 1222251821}
   - component: {fileID: 1222251823}
   - component: {fileID: 1222251822}
+  - component: {fileID: 1222251824}
   m_Layer: 5
   m_Name: Status
   m_TagString: Untagged
@@ -2136,6 +2138,24 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1222251820}
   m_CullTransparentMesh: 1
+--- !u!114 &1222251824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222251820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8168192a3490b242a327c2d74131563, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RegisterManager
+  panel: {fileID: 0}
+  usernameInput: {fileID: 0}
+  passwordInput: {fileID: 0}
+  feedbackText: {fileID: 0}
+  playerSelectionManager: {fileID: 0}
+  api: {fileID: 0}
 --- !u!1 &1435854953
 GameObject:
   m_ObjectHideFlags: 0
@@ -2579,6 +2599,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1480056777}
   m_CullTransparentMesh: 1
+--- !u!1 &1516611193
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1516611194}
+  - component: {fileID: 1516611195}
+  m_Layer: 0
+  m_Name: RegisterManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1516611194
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1516611193}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 27.414307, y: 58.254517, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1656792148}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1516611195
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1516611193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8168192a3490b242a327c2d74131563, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RegisterManager
+  panel: {fileID: 1656792147}
+  usernameInput: {fileID: 1752064763}
+  passwordInput: {fileID: 488432786}
+  feedbackText: {fileID: 1222251822}
+  playerSelectionManager: {fileID: 44184607}
+  api: {fileID: 2068668777}
 --- !u!1 &1569504473
 GameObject:
   m_ObjectHideFlags: 0
@@ -2912,6 +2982,7 @@ RectTransform:
   - {fileID: 287641531}
   - {fileID: 293460891}
   - {fileID: 1222251821}
+  - {fileID: 1516611194}
   m_Father: {fileID: 1209988788}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3972,6 +4043,59 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1981318952}
   m_CullTransparentMesh: 1
+--- !u!1 &2068668776
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2068668778}
+  - component: {fileID: 2068668777}
+  m_Layer: 0
+  m_Name: APIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2068668777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2068668776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e15006b2b95e44c9cfc996a3eb705e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::APIManager
+  lastLoginSuccess: 0
+  lastRegisterSuccess: 0
+  lastPlayerStatsJSON: 
+  lastMoveJSON: 
+  topPlayersJSON: 
+  matchHistoryJSON: 
+  mostPlayedMapJSON: 
+  winRateJSON: 
+  fetchedUsers: []
+--- !u!4 &2068668778
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2068668776}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 27.414307, y: 57.254517, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1209988788}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2109139592
 GameObject:
   m_ObjectHideFlags: 0
@@ -5274,6 +5398,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PasswordManager
   panel: {fileID: 9055691744808848963}
   inputField: {fileID: 8263651020676874239}
+  api: {fileID: 2068668777}
 --- !u!114 &8757354359291671329
 MonoBehaviour:
   m_ObjectHideFlags: 0
