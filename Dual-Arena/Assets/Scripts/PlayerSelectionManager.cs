@@ -74,10 +74,19 @@ public class PlayerSelectionManager : MonoBehaviour
 
         StartCoroutine(StartTournamentFlow()); // ✅ THIS WAS MISSING
     }
-    
+
     IEnumerator StartTournamentFlow()
     {
-        GameData.currentRound = 1;
+        int playerCount = GameData.tournamentPlayers.Count;
+
+        if (playerCount == 16)
+            GameData.currentRound = 4;
+        else if (playerCount == 8)
+            GameData.currentRound = 3;
+        else if (playerCount == 4)
+            GameData.currentRound = 2;
+        else if (playerCount == 2)
+            GameData.currentRound = 1; 
 
         // 🔥 CREATE TOURNAMENT FIRST
         yield return StartCoroutine(

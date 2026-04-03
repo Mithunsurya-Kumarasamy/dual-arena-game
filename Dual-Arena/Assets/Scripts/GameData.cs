@@ -18,4 +18,5 @@ public static class GameData
     public static bool tournamentFinished = false;
     public static int currentTournamentID;
     public static int currentRound = 1;
+    public static bool nextRoundGenerated = false;
 }

@@ -30,18 +30,118 @@ public class TournamentBracketManager : MonoBehaviour
         // rebuild GameData
         GameData.tournamentMatches.Clear();
 
+        // 🔥 find latest round number
+        int latestRound = -1;
+
         foreach (var m in api.fetchedMatches)
         {
-            MatchData match = new MatchData();
-            match.player1 = m.Player1;
-            match.player2 = m.Player2;
-            match.winner = m.Winner;
-
-            GameData.tournamentMatches.Add(match);
+            if (m.RoundNumber > latestRound)
+                latestRound = m.RoundNumber;
         }
+        GameData.currentRound = latestRound;
+
+        // 🔥 only load matches from latest round
+        foreach (var m in api.fetchedMatches)
+        {
+            if (m.RoundNumber == latestRound)
+            {
+                MatchData match = new MatchData();
+                match.player1 = m.Player1;
+                match.player2 = m.Player2;
+                match.winner = m.Winner;
+
+                GameData.tournamentMatches.Add(match);
+            }
+        }
+
+        // rebuild player list from matches
+        HashSet<string> players = new HashSet<string>();
+
+        foreach (var m in GameData.tournamentMatches)
+        {
+            players.Add(m.player1);
+            players.Add(m.player2);
+        }
+
+        GameData.tournamentPlayers = new List<string>(players);
+        // 🔥 RESUME LOGIC
 
         GameData.tournamentMatchIndex = 0;
 
+        // find first unplayed match
+        for (int i = 0; i < GameData.tournamentMatches.Count; i++)
+        {
+            if (string.IsNullOrEmpty(GameData.tournamentMatches[i].winner))
+            {
+                GameData.tournamentMatchIndex = i;
+                break;
+            }
+
+            // if all matches completed
+            GameData.tournamentMatchIndex = GameData.tournamentMatches.Count;
+        }
+
+        // ✅ CHECK IF ROUND COMPLETED
+        // ✅ CHECK IF ROUND COMPLETED
+        if (GameData.tournamentMatchIndex >= GameData.tournamentMatches.Count)
+        {
+            bool nextRoundExists = false;
+
+            foreach (var m in api.fetchedMatches)
+            {
+                if (m.RoundNumber == GameData.currentRound - 1)
+                {
+                    nextRoundExists = true;
+                    break;
+                }
+            }
+
+            if (!nextRoundExists)
+            {
+                Debug.Log("🔥 Generating next round (LOAD)");
+                GenerateNextRound();
+            }
+            else
+            {
+                Debug.Log("✅ Next round already exists → loading it");
+
+                GameData.currentRound--;
+
+                GameData.tournamentMatches.Clear();
+
+                foreach (var m in api.fetchedMatches)
+                {
+                    if (m.RoundNumber == GameData.currentRound)
+                    {
+                        MatchData match = new MatchData();
+                        match.player1 = m.Player1;
+                        match.player2 = m.Player2;
+                        match.winner = m.Winner;
+
+                        GameData.tournamentMatches.Add(match);
+                    }
+                }
+            }
+
+            GameData.tournamentMatchIndex = 0;
+        }
+        // ✅ CHECK IF TOURNAMENT FINISHED
+        if (GameData.tournamentMatches.Count == 1 &&
+            !string.IsNullOrEmpty(GameData.tournamentMatches[0].winner))
+        {
+            GameData.tournamentFinished = true;
+            GameData.tournamentWinner = GameData.tournamentMatches[0].winner;
+
+            nextButton.SetActive(false);
+            mmButton.SetActive(true);
+
+            bracketText.text = "Tournament Over!";
+            matchInfoText.text = "CHAMPION: " + GameData.tournamentWinner;
+
+            yield break; // 🚨 IMPORTANT
+        }
+
+        // 🔥 AFTER ALL LOGIC → UI
         DisplayBracket();
         UpdateCurrentMatch();
     }
@@ -107,7 +207,7 @@ public class TournamentBracketManager : MonoBehaviour
 
             GameData.tournamentMatches.Add(m);
         }
-        GameData.currentRound++;
+        GameData.currentRound--;
         StartCoroutine(SendNextRoundToDB());
 
         GameData.tournamentPlayers = winners;
@@ -149,12 +249,12 @@ public class TournamentBracketManager : MonoBehaviour
         else
             Debug.LogError("❌ Failed to save next round");
     }
-    string GetRoundName(int totalPlayers)
+    string GetRoundName(int roundNumber)
     {
-        if (totalPlayers == 16) return "Round of 16";
-        if (totalPlayers == 8) return "Quarter Final";
-        if (totalPlayers == 4) return "Semi Final";
-        if (totalPlayers == 2) return "Final";
+        if (roundNumber == 4) return "Round of 16";
+        if (roundNumber == 3) return "Quarter Final";
+        if (roundNumber == 2) return "Semi Final";
+        if (roundNumber == 1) return "Final";
 
         return "Match";
     }
@@ -173,7 +273,7 @@ public class TournamentBracketManager : MonoBehaviour
     void DisplayBracket()
     {
         int total = GameData.tournamentPlayers.Count;
-        string roundName = GetRoundName(total);
+        string roundName = GetRoundName(GameData.currentRound);
 
         // Clear all
         lbracketText.text = "";
@@ -223,7 +323,7 @@ public class TournamentBracketManager : MonoBehaviour
     void UpdateCurrentMatch()
     {
         int total = GameData.tournamentPlayers.Count;
-        string roundName = GetRoundName(total);
+        string roundName = GetRoundName(GameData.currentRound);
 
         if (GameData.tournamentMatches == null || GameData.tournamentMatches.Count == 0)
         {
