@@ -133,7 +133,6 @@ public class TournamentBracketManager : MonoBehaviour
             GameData.tournamentWinner = GameData.tournamentMatches[0].winner;
 
             nextButton.SetActive(false);
-            mmButton.SetActive(true);
 
             bracketText.text = "Tournament Over!";
             matchInfoText.text = "CHAMPION: " + GameData.tournamentWinner;

@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\PlayerSelectionManager.cs" />
     <Compile Include="Assets\Scripts\PlayerRow.cs" />
+    <Compile Include="Assets\Scripts\AboutManager.cs" />
     <Compile Include="Assets\Scripts\MapSelectionManager.cs" />
     <Compile Include="Assets\Scripts\StatsUIManager.cs" />
     <Compile Include="Assets\Scripts\APIManager.cs" />

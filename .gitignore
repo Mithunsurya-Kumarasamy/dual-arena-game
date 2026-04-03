@@ -8,7 +8,7 @@ Dual-Arena/Builds/
 
 # Node
 node_modules/
-
+.env
 # OS
 .DS_Store
 Thumbs.db

@@ -80,6 +80,27 @@ public class APIManager : MonoBehaviour
         }
     }
 
+    public string tournamentStatsJSON;
+
+    public IEnumerator GetTournamentStats()
+    {
+        UnityWebRequest www = UnityWebRequest.Get(baseURL + "/stats/tournamentStats");
+
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            tournamentStatsJSON = www.downloadHandler.text;
+
+            Debug.Log("RAW JSON: " + tournamentStatsJSON); // ✅ MOVE HERE
+        }
+        else
+        {
+            Debug.LogError("❌ Failed to get tournament stats: " + www.error);
+            tournamentStatsJSON = "[]"; // ✅ PREVENT CRASH
+        }
+    }
+
     public IEnumerator GetTournaments()
     {
         UnityWebRequest www = UnityWebRequest.Get(baseURL + "/tournament/getTournaments");

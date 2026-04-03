@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class HowToPlayManager : MonoBehaviour
 {
@@ -22,11 +23,12 @@ public class HowToPlayManager : MonoBehaviour
 
     public void ClosePanel()
     {
-        panel.SetActive(false);
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void Show1v1Rules()
     {
+        panel.SetActive(true);
         b1.SetActive(false);
         b2.SetActive(false);
         b3.SetActive(false);
@@ -69,6 +71,7 @@ public class HowToPlayManager : MonoBehaviour
 
     public void ShowTournamentRules()
     {
+        panel.SetActive(true);
         b1.SetActive(false);
         b2.SetActive(false);
         b3.SetActive(false);
@@ -114,6 +117,7 @@ public class HowToPlayManager : MonoBehaviour
         b2.SetActive(true);
         b3.SetActive(true);
         BackBtn.SetActive(false);
+        panel.SetActive(false);
 
         leftText.gameObject.SetActive(false);
         rightText.gameObject.SetActive(false);

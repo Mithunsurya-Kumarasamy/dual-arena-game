@@ -50,6 +50,17 @@ public class StatsUIManager : MonoBehaviour
         StartCoroutine(TopPlayersRoutine());
     }
 
+    [System.Serializable]
+    public class TournamentStat
+    {
+        public int TournamentID;
+        public string TournamentName;
+        public int TotalPlayers;
+        public int TotalMatches;
+        public string Winner;
+        public string Status;
+    }
+
     IEnumerator TopPlayersRoutine()
     {
         yield return StartCoroutine(api.GetTopPlayers());
@@ -100,9 +111,12 @@ public class StatsUIManager : MonoBehaviour
 
         if (maps.Length > 0)
         {
-                resultsText.text =
-        "MOST PLAYED MAP\n\n" +
-        maps[0].MapName + " (" + maps[0].TimesPlayed + " matches)";
+            resultsText.text =
+                "MOST PLAYED MAPS\n\n" +
+                maps[0].MapName + " (" + maps[0].TimesPlayed + " matches)\n"+
+                maps[1].MapName + " (" + maps[1].TimesPlayed + " matches)\n"+
+                maps[2].MapName + " (" + maps[2].TimesPlayed + " matches)\n"+
+                maps[3].MapName + " (" + maps[3].TimesPlayed + " matches)\n";
         }
         else
         {
@@ -141,6 +155,39 @@ public class StatsUIManager : MonoBehaviour
         {
             resultsText.text +=
                 player.Username + " - " + player.WinRate.ToString("0.0") + "%\n";
+        }
+    }
+
+    public void ShowTournamentStats()
+    {
+        Debug.Log("RAW JSON: " + api.tournamentStatsJSON);
+        StartCoroutine(TournamentStatsRoutine());
+    }
+
+    IEnumerator TournamentStatsRoutine()
+    {
+        yield return StartCoroutine(api.GetTournamentStats());
+
+        TournamentStat[] data =
+            JsonHelper.FromJson<TournamentStat>(api.tournamentStatsJSON);
+
+        resultsPanel.SetActive(true);
+        resultsText.text = "TOURNAMENT HISTORY\n\n";
+
+        if (data.Length == 0)
+        {
+            resultsText.text += "No tournaments found";
+            yield break;
+        }
+
+        foreach (var t in data)
+        {
+            resultsText.text +=
+                "Tournament name: " + t.TournamentName + "\n" +
+                "Players: " + t.TotalPlayers + "\n" +
+                "Matches: " + t.TotalMatches + "\n" +
+                "Winner: " + (string.IsNullOrEmpty(t.Winner) ? "—" : t.Winner) + "\n" +
+                "Status: " + t.Status + "\n\n";
         }
     }
     // 🔁 SCENE NAVIGATION

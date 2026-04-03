@@ -138,9 +138,9 @@ public class RoundManager : MonoBehaviour
         ));
         resultPanel.SetActive(true);
 
-        resultText.text = winnerName + " WINS!";
+        resultText.text = "WINNER: " + winnerName ;
 
-        statsText.text =
+        statsText.text = "HP Remaining: " +
             GameData.player1Name + ": " + player1HP + "\n" +
             GameData.player2Name + ": " + player2HP;
         GameData.lastWinner = winnerName;
@@ -157,7 +157,7 @@ public class RoundManager : MonoBehaviour
                 winnerName
             ));
             playAgainButton.SetActive(false);
-            mainMenuButton.SetActive(false);
+            mainMenuButton.SetActive(true);
             nextMatchButton.SetActive(true);
             MapSelectButton.SetActive(false);
         }
@@ -236,9 +236,9 @@ public class RoundManager : MonoBehaviour
 
     IEnumerator ResolveRound(int p1Move, int p2Move)
     {
-        p1MoveText.text = GameData.player1Name + ": " + MoveName(p1Move);
+        p1MoveText.text = GameData.player1Name + " chooses " + MoveName(p1Move);
         yield return new WaitForSeconds(1f);
-        p2MoveText.text = GameData.player2Name + ": " + MoveName(p2Move);
+        p2MoveText.text = GameData.player2Name + " chooses " + MoveName(p2Move);
 
         statusText.text = ""; // clear bottom
 
@@ -453,9 +453,9 @@ public class RoundManager : MonoBehaviour
 
     void ApplyDamage(int winner, int p1Move, int p2Move)
     {
-        int lightDamage = Random.Range(8, 15);
-        int heavyDamage = Random.Range(20, 30);
-        int blockReflect = Random.Range(7, 13);
+        int lightDamage = Random.Range(18, 25);
+        int heavyDamage = Random.Range(27, 35);
+        int blockReflect = Random.Range(12, 17);
 
         // 🔥 HEAVY vs BLOCK (REFLECT DAMAGE)
         // HEAVY vs BLOCK
