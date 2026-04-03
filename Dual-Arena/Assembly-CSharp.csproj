@@ -56,6 +56,7 @@
     <Compile Include="Assets\Scripts\APIManager.cs" />
     <Compile Include="Assets\Scripts\RoundSimulator.cs" />
     <Compile Include="Assets\Scripts\MoveSelectionManager.cs" />
+    <Compile Include="Assets\Scripts\LoadTournamentManager.cs" />
     <Compile Include="Assets\Scripts\MatchData.cs" />
     <Compile Include="Assets\Scripts\TournamentSetupManager.cs" />
     <Compile Include="Assets\Scripts\TournamentBracketManager.cs" />

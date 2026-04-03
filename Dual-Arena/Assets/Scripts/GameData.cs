@@ -14,6 +14,8 @@ public static class GameData
     public static bool winnerProcessed = false;
     public static int tournamentMatchIndex = 0;
     public static string tournamentWinner;
+    public static string tournamentName;
     public static bool tournamentFinished = false;
     public static int currentTournamentID;
+    public static int currentRound = 1;
 }

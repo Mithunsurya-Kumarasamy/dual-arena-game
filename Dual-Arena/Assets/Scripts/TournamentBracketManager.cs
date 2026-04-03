@@ -1,6 +1,8 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 public class TournamentBracketManager : MonoBehaviour
@@ -16,7 +18,10 @@ public class TournamentBracketManager : MonoBehaviour
 
     void Start()
     {
-        HandleWinnerReturn();
+        if (!GameData.winnerProcessed)
+        {
+            HandleWinnerReturn();
+        }
         if (GameData.tournamentFinished)
         {
             nextButton.SetActive(false);
@@ -41,7 +46,11 @@ public class TournamentBracketManager : MonoBehaviour
     }
     public void RecordWinner(string winner)
     {
-        GameData.tournamentMatches[GameData.tournamentMatchIndex].winner = winner;
+        var match = GameData.tournamentMatches[GameData.tournamentMatchIndex];
+
+        match.winner = winner;
+
+        Debug.Log("✅ Winner set for: " + match.player1 + " vs " + match.player2);
 
         GameData.tournamentMatchIndex++;
 
@@ -56,6 +65,7 @@ public class TournamentBracketManager : MonoBehaviour
 
         Debug.Log("Match Index: " + GameData.tournamentMatchIndex);
         Debug.Log("Total Matches: " + GameData.tournamentMatches.Count);
+        GameData.winnerProcessed = true;
     }
     void GenerateNextRound()
     {
@@ -86,8 +96,47 @@ public class TournamentBracketManager : MonoBehaviour
 
             GameData.tournamentMatches.Add(m);
         }
+        GameData.currentRound++;
+        StartCoroutine(SendNextRoundToDB());
 
         GameData.tournamentPlayers = winners;
+    }
+
+    IEnumerator SendNextRoundToDB()
+    {
+        List<PlayerSelectionManager.MatchSend> matchList = new List<PlayerSelectionManager.MatchSend>();
+
+        for (int i = 0; i < GameData.tournamentMatches.Count; i++)
+        {
+            var m = GameData.tournamentMatches[i];
+
+            PlayerSelectionManager.MatchSend data = new PlayerSelectionManager.MatchSend();
+            data.player1 = m.player1;
+            data.player2 = m.player2;
+            data.roundNumber = GameData.currentRound; // or track round separately
+            data.matchOrder = i;
+
+            matchList.Add(data);
+        }
+
+        PlayerSelectionManager.MatchWrapper wrapper = new PlayerSelectionManager.MatchWrapper();
+        wrapper.matches = matchList;
+
+        string json = JsonUtility.ToJson(wrapper);
+
+        WWWForm form = new WWWForm();
+        form.AddField("tournamentId", GameData.currentTournamentID);
+        form.AddField("matches", json);
+
+        UnityWebRequest www = UnityWebRequest.Post(
+            "http://localhost:3000/tournament/createMatches", form);
+
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+            Debug.Log("✅ Next round saved");
+        else
+            Debug.LogError("❌ Failed to save next round");
     }
     string GetRoundName(int totalPlayers)
     {
@@ -103,6 +152,8 @@ public class TournamentBracketManager : MonoBehaviour
     {
         foreach (var match in GameData.tournamentMatches)
         {
+            Debug.Log("Checking winner: " + match.winner);
+
             if (string.IsNullOrEmpty(match.winner))
                 return false;
         }
@@ -162,6 +213,18 @@ public class TournamentBracketManager : MonoBehaviour
     {
         int total = GameData.tournamentPlayers.Count;
         string roundName = GetRoundName(total);
+
+        if (GameData.tournamentMatches == null || GameData.tournamentMatches.Count == 0)
+        {
+            Debug.LogError("❌ No matches available");
+            return;
+        }
+
+        if (GameData.tournamentMatchIndex >= GameData.tournamentMatches.Count)
+        {
+            Debug.LogError("❌ Index out of range: " + GameData.tournamentMatchIndex);
+            return;
+        }
 
         var match = GameData.tournamentMatches[GameData.tournamentMatchIndex];
 

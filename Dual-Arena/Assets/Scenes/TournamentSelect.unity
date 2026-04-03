@@ -247,9 +247,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TournamentMenuController, Assembly-CSharp
-        m_MethodName: OnNewTournament
+      - m_Target: {fileID: 176206374}
+        m_TargetAssemblyTypeName: TournamentSetupManager, Assembly-CSharp
+        m_MethodName: onNew
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -592,9 +592,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TournamentMenuController, Assembly-CSharp
-        m_MethodName: OnLoadTournament
+      - m_Target: {fileID: 176206374}
+        m_TargetAssemblyTypeName: TournamentSetupManager, Assembly-CSharp
+        m_MethodName: onLoad
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1535,9 +1535,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: TournamentMenuController, Assembly-CSharp
-        m_MethodName: OnBack
+      - m_Target: {fileID: 176206374}
+        m_TargetAssemblyTypeName: TournamentSetupManager, Assembly-CSharp
+        m_MethodName: bak
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

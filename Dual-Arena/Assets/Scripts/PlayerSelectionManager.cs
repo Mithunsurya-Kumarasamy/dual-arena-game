@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
@@ -17,8 +18,24 @@ public class PlayerSelectionManager : MonoBehaviour
     private int lockedPlayers = 0;
 
     public Button nextButton;
+    [System.Serializable]
+    public class MatchSend
+    {
+        public string player1;
+        public string player2;
+        public int roundNumber;
+        public int matchOrder;
+    }
+
+    [System.Serializable]
+    public class MatchWrapper
+    {
+        public List<MatchSend> matches;
+    }
     void Start()
     {
+
+
         int count = GameData.tournamentPlayerCount;
         if (count == 0) count = 4;
 
@@ -55,11 +72,74 @@ public class PlayerSelectionManager : MonoBehaviour
     {
         GameData.tournamentPlayers = new List<string>(selectedPlayers);
 
+        StartCoroutine(StartTournamentFlow()); // ✅ THIS WAS MISSING
+    }
+    
+    IEnumerator StartTournamentFlow()
+    {
+        GameData.currentRound = 1;
+
+        // 🔥 CREATE TOURNAMENT FIRST
+        yield return StartCoroutine(
+            passwordManager.api.CreateTournament(
+                GameData.tournamentName,   // you must store this earlier
+                GameData.tournamentPlayerCount
+            )
+        );
+
+        GameData.currentTournamentID = passwordManager.api.createdTournamentID;
+
+        Debug.Log("🎯 Tournament ID: " + GameData.currentTournamentID);
+
+        // THEN generate matches
         GenerateBracket();
 
-        UnityEngine.SceneManagement.SceneManager.LoadScene("TournamentMatchScene");
-    }
+        GameData.tournamentMatchIndex = 0;
 
+        yield return StartCoroutine(SendTournamentMatches());
+
+        SceneManager.LoadScene("TournamentMatchScene");
+    }
+    IEnumerator SendTournamentMatches()
+    {
+        List<MatchSend> matchList = new List<MatchSend>();
+
+        for (int i = 0; i < GameData.tournamentMatches.Count; i++)
+        {
+            var m = GameData.tournamentMatches[i];
+
+            MatchSend data = new MatchSend();
+            data.player1 = m.player1;
+            data.player2 = m.player2;
+            data.roundNumber = GameData.currentRound;
+            data.matchOrder = i;
+
+            matchList.Add(data);
+        }
+
+        MatchWrapper wrapper = new MatchWrapper();
+        wrapper.matches = matchList;
+
+        string json = JsonUtility.ToJson(wrapper);
+
+        WWWForm form = new WWWForm();
+        form.AddField("tournamentId", GameData.currentTournamentID);
+        form.AddField("matches", json);
+
+        UnityWebRequest www = UnityWebRequest.Post(
+            "http://localhost:3000/tournament/createMatches", form);
+
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("✅ Matches saved to DB");
+        }
+        else
+        {
+            Debug.LogError("❌ Failed to save matches: " + www.error);
+        }
+    }
     void GenerateBracket()
     {
         GameData.tournamentMatches.Clear();
@@ -106,7 +186,7 @@ public class PlayerSelectionManager : MonoBehaviour
     IEnumerator RefreshDelay()
     {
         yield return new WaitForSeconds(0.5f);
-        StartCoroutine(RefreshDelay());
+        StartCoroutine(LoadUsers());
     }
     public void CloseRegister()
     {

@@ -23,12 +23,72 @@ public class APIManager : MonoBehaviour
     public string mostPlayedMapJSON;
     public string winRateJSON;
 
+    public int createdTournamentID;
+    [System.Serializable]
+    public class Tournament
+    {
+        public int TournamentID;
+        public string TournamentName;
+    }
+
+    [System.Serializable]
+    public class TournamentListWrapper
+    {
+        public List<Tournament> tournaments;
+    }
+
+    public List<Tournament> fetchedTournaments = new List<Tournament>();
+
+    public IEnumerator GetTournaments()
+    {
+        UnityWebRequest www = UnityWebRequest.Get(baseURL + "/tournament/getTournaments");
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            string json = www.downloadHandler.text;
+            Debug.Log("Tournaments: " + json);
+
+            TournamentListWrapper wrapper =
+                JsonUtility.FromJson<TournamentListWrapper>("{\"tournaments\":" + json + "}");
+
+            fetchedTournaments = wrapper.tournaments;
+        }
+        else
+        {
+            Debug.LogError("❌ Error fetching tournaments: " + www.error);
+        }
+    }
+
+    public IEnumerator CreateTournament(string name, int playerCount)
+    {
+        WWWForm form = new WWWForm();
+        form.AddField("name", name);
+        form.AddField("playerCount", playerCount);
+
+        UnityWebRequest www = UnityWebRequest.Post(baseURL + "/tournament/createTournament", form);
+
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            string json = www.downloadHandler.text;
+            Debug.Log("Create Tournament Response: " + json);
+
+            createdTournamentID = int.Parse(json.Split(':')[2].Replace("}", "").Trim());
+        }
+        else
+        {
+            Debug.LogError("❌ CreateTournament failed: " + www.error);
+        }
+    }
     public IEnumerator SaveTournamentMatch(int tournamentId, int matchIndex, string winner)
     {
         WWWForm form = new WWWForm();
         form.AddField("tournamentId", tournamentId);
         form.AddField("matchIndex", matchIndex);
         form.AddField("winner", winner);
+        form.AddField("roundNumber", GameData.currentRound);
 
         using (UnityEngine.Networking.UnityWebRequest www =
             UnityEngine.Networking.UnityWebRequest.Post(baseURL + "/tournament/saveMatch", form))

@@ -18,7 +18,7 @@ public class MainMenuController : MonoBehaviour
         GameData.tournamentFinished = false;
         GameData.tournamentMatches.Clear();
         GameData.tournamentPlayers.Clear();
-        SceneManager.LoadScene("TournamentScene");
+        SceneManager.LoadScene("TournamentSelect");
         GameData.isTournamentMode = true;
     }
 
