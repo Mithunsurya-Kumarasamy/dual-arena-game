@@ -1,9 +1,7 @@
+DROP DATABASE IF EXISTS DuelArenaDB;
 CREATE DATABASE DuelArenaDB;
 USE DuelArenaDB;
 
--- =========================
--- USERS
--- =========================
 CREATE TABLE Users (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
     Username VARCHAR(50) UNIQUE,
@@ -11,23 +9,12 @@ CREATE TABLE Users (
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- =========================
--- MAPS
--- =========================
 CREATE TABLE Maps (
     MapID INT AUTO_INCREMENT PRIMARY KEY,
     MapName VARCHAR(50)
 );
+ 
 
-INSERT INTO Maps (MapName) VALUES
-('Desert'),
-('Forest'),
-('Arena'),
-('Snow');
-
--- =========================
--- MATCHES
--- =========================
 CREATE TABLE Matches (
     MatchID INT AUTO_INCREMENT PRIMARY KEY,
     Player1ID INT,
@@ -42,9 +29,6 @@ CREATE TABLE Matches (
     FOREIGN KEY (MapID) REFERENCES Maps(MapID)
 );
 
--- =========================
--- ROUNDS
--- =========================
 CREATE TABLE Rounds (
     RoundID INT AUTO_INCREMENT PRIMARY KEY,
     MatchID INT,
@@ -53,9 +37,6 @@ CREATE TABLE Rounds (
     FOREIGN KEY (MatchID) REFERENCES Matches(MatchID)
 );
 
--- =========================
--- MOVES
--- =========================
 CREATE TABLE Moves (
     MoveID INT AUTO_INCREMENT PRIMARY KEY,
     RoundID INT,
@@ -67,9 +48,6 @@ CREATE TABLE Moves (
     FOREIGN KEY (PlayerID) REFERENCES Users(UserID)
 );
 
--- =========================
--- PLAYER STATS
--- =========================
 CREATE TABLE PlayerStats (
     StatID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
@@ -82,9 +60,6 @@ CREATE TABLE PlayerStats (
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
--- =========================
--- MAP STATS
--- =========================
 CREATE TABLE MapStats (
     MapStatID INT AUTO_INCREMENT PRIMARY KEY,
     MapID INT,
@@ -94,76 +69,23 @@ CREATE TABLE MapStats (
 
     FOREIGN KEY (MapID) REFERENCES Maps(MapID)
 );
+CREATE TABLE TournamentMatches (
+    MatchID INT AUTO_INCREMENT PRIMARY KEY,
+    TournamentID INT,
+    Player1 VARCHAR(50),
+    Player2 VARCHAR(50),
+    Winner VARCHAR(50) DEFAULT NULL,
+    RoundNumber INT,
+    MatchOrder INT
+); 
 
--- =========================
--- TOURNAMENTS
--- =========================
 CREATE TABLE Tournaments (
     TournamentID INT AUTO_INCREMENT PRIMARY KEY,
-    TournamentName VARCHAR(50),
-    StartDate DATE,
-    EndDate DATE
+    TournamentName VARCHAR(100),
+    TotalPlayers INT,
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- =========================
--- TOURNAMENT MATCHES
--- =========================
-CREATE TABLE TournamentMatches (
-    TM_ID INT AUTO_INCREMENT PRIMARY KEY,
-    TournamentID INT,
-    MatchID INT,
-    Stage VARCHAR(50),
-
-    FOREIGN KEY (TournamentID) REFERENCES Tournaments(TournamentID),
-    FOREIGN KEY (MatchID) REFERENCES Matches(MatchID)
-);
-
--- =========================
--- SAMPLE USERS
--- =========================
-INSERT INTO Users (Username, Password) VALUES
-('Ashwin', '123'),
-('Mithun', '1234'),
-('Player3', '123'),
-('Player4', '123'),
-('Player5', '123'),
-('Player6', '123');
-
--- =========================
--- SAMPLE MATCHES
--- =========================
-INSERT INTO Matches (Player1ID, Player2ID, WinnerID, MapID) VALUES
-(1, 2, 1, 1),
-(2, 3, 2, 2),
-(3, 4, 3, 3),
-(1, 4, 1, 1);
-
-INSERT INTO PlayerStats (UserID, TotalMatches, Wins, Losses)
-VALUES
-(1, 5, 3, 2),
-(2, 4, 2, 2),
-(3, 3, 1, 2);
-
-INSERT INTO Rounds (MatchID, RoundNumber) VALUES
-(1,1),
-(1,2),
-(2,1),
-(2,2);
-
-INSERT INTO Moves (RoundID, PlayerID, MoveType, DamageDealt)
-VALUES
-(1, 1, 'Light', 10),
-(1, 1, 'Light', 12),
-(1, 1, 'Heavy', 20),
-(2, 1, 'Light', 8),
-
-(3, 2, 'Heavy', 25),
-(3, 2, 'Heavy', 22),
-(4, 2, 'Block', 0);
-
--- =========================
--- 🥇 TOP PLAYERS
--- =========================
 DELIMITER //
 CREATE PROCEDURE GetTopPlayers()
 BEGIN
@@ -175,9 +97,6 @@ BEGIN
 END //
 DELIMITER ;
 
--- =========================
--- 📜 MATCH HISTORY
--- =========================
 DELIMITER //
 CREATE PROCEDURE GetMatchHistory()
 BEGIN
@@ -196,9 +115,7 @@ BEGIN
 END //
 DELIMITER ;
 
--- =========================
--- 🗺️ MOST PLAYED MAP
--- =========================
+
 DELIMITER //
 CREATE PROCEDURE GetMostPlayedMap()
 BEGIN
@@ -206,14 +123,10 @@ BEGIN
     FROM Matches m
     JOIN Maps mp ON m.MapID = mp.MapID
     GROUP BY m.MapID
-    ORDER BY TimesPlayed DESC
-    LIMIT 1;
+    ORDER BY TimesPlayed DESC;
 END //
 DELIMITER ;
 
--- =========================
--- 📊 WIN RATE
--- =========================
 
 DELIMITER //
 CREATE PROCEDURE GetWinRate()
@@ -268,7 +181,6 @@ BEGIN
 END //
 DELIMITER ;
 
-
 DELIMITER //
 
 CREATE PROCEDURE GetMostUsedMove(IN uname VARCHAR(50))
@@ -281,31 +193,46 @@ BEGIN
     ORDER BY UsageCount DESC
     LIMIT 1;
 END //
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE GetTournamentStats()
+BEGIN
+    SELECT 
+        t.TournamentID,
+        t.TournamentName,
+        t.TotalPlayers,
+
+        COUNT(tm.MatchID) AS TotalMatches,
+
+        -- winner = last match winner (final)
+        MAX(CASE 
+            WHEN tm.RoundNumber = 1 THEN tm.Winner 
+            ELSE NULL 
+        END) AS Winner,
+
+        CASE 
+            WHEN MAX(CASE WHEN tm.RoundNumber = 1 AND tm.Winner IS NOT NULL THEN 1 ELSE 0 END) = 1
+            THEN 'Completed'
+            ELSE 'Ongoing'
+        END AS Status
+
+    FROM Tournaments t
+
+    LEFT JOIN TournamentMatches tm 
+        ON t.TournamentID = tm.TournamentID
+
+    GROUP BY t.TournamentID
+
+    ORDER BY t.TournamentID DESC;
+END //
 
 DELIMITER ;
 
-select * from matches;
-select * from users;
-UPDATE Mapstats SET MapName = "Castle Arena" WHERE MapID = 1;
-UPDATE Mapstats SET MapName = "Colosseum Arena" WHERE MapID = 2;
-UPDATE Mapstats SET MapName = "Prison Arena" WHERE MapID = 3;
-UPDATE Mapstats SET MapName = "Cave Arena" WHERE MapID = 4;
-ALTER TABLE mapstats
-RENAME COLUMN map_name TO MapName;
 
-SELECT MapID, 0, 0, 0 FROM Maps;
+INSERT INTO Maps (MapName) VALUES
+('Castle Arena'), ('Colosseum Arena'), ('Prison Arena'), ('Cave Arena');
+ 
+INSERT INTO MapStats (MapID) VALUES (1),(2),(3),(4);
 
-alter table mapstats add map_name varchar(50);
-
-INSERT INTO PlayerStats (UserID)
-SELECT UserID FROM Users;
-select * from matches;
-select * from moves;
-select * from rounds;
-select* from playerstats;
-
-truncate table playerstats;
-
-
-
-SELECT UserID, TotalDamageDealt, TotalDamageTaken FROM PlayerStats;
