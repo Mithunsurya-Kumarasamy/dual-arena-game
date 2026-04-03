@@ -9,17 +9,17 @@ public class LoginManager : MonoBehaviour
     public UserManager userManager;
     public APIManager api;
 
-    // PLAYER 1
+    
     public TMP_Dropdown p1Dropdown;
     public TMP_InputField p1Password;
     public TextMeshProUGUI p1Status;
 
-    // PLAYER 2
+    
     public TMP_Dropdown p2Dropdown;
     public TMP_InputField p2Password;
     public TextMeshProUGUI p2Status;
 
-    // REGISTER
+    
     public TMP_InputField regUsername;
     public TMP_InputField regPassword;
     public TextMeshProUGUI registerStatus;
@@ -48,7 +48,7 @@ public class LoginManager : MonoBehaviour
         p1Dropdown.AddOptions(api.fetchedUsers);
         p2Dropdown.AddOptions(api.fetchedUsers);
     }
-    // 🔐 PLAYER 1 LOGIN
+    
     public void LoginP1()
     {
         if (p1Password.text == "")
@@ -90,7 +90,7 @@ public class LoginManager : MonoBehaviour
         }
     }
 
-    // 🔐 PLAYER 2 LOGIN
+    
     public void LoginP2()
     {
         if (p2Password.text == "")
@@ -132,7 +132,7 @@ public class LoginManager : MonoBehaviour
         }
     }
 
-    // ▶ START GAME
+    
     public void GoToMapSelection()
     {
         if (!p1Logged || !p2Logged)
@@ -161,7 +161,7 @@ public class LoginManager : MonoBehaviour
         SceneManager.LoadScene("MapSelection");
     }
 
-    // 🆕 REGISTER
+    
     public void RegisterUser()
     {
         if (regUsername.text == "" || regPassword.text == "")
@@ -194,7 +194,7 @@ public class LoginManager : MonoBehaviour
         }
     }
 
-    // 🪟 REGISTER PANEL
+    
     public void OpenRegister()
     {
         registerPanel.SetActive(true);
@@ -223,7 +223,7 @@ public class LoginManager : MonoBehaviour
         p2Status.color = Color.white;
     }
 
-    // 🔙 BACK
+    
     public void GoBack()
     {
         SceneManager.LoadScene("MainMenu");

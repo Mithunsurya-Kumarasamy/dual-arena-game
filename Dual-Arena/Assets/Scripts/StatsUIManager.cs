@@ -44,7 +44,7 @@ public class StatsUIManager : MonoBehaviour
     public GameObject resultsPanel;
     public TextMeshProUGUI resultsText;
 
-    // 🏆 TOP PLAYERS
+    
     public void ShowTopPlayers()
     {
         StartCoroutine(TopPlayersRoutine());
@@ -79,7 +79,7 @@ public class StatsUIManager : MonoBehaviour
         }
     }
 
-    // 📜 MATCH HISTORY
+    
     public void ShowMatchHistory()
     {
         StartCoroutine(MatchHistoryRoutine());
@@ -124,13 +124,13 @@ public class StatsUIManager : MonoBehaviour
         }
     }
 
-    // 🗺️ MOST PLAYED MAP
+    
     public void ShowMostPlayedMap()
     {
         StartCoroutine(MapRoutine());
     }
 
-    // 📊 WIN RATE
+    
     public void ShowWinRate()
     {
         StartCoroutine(WinRateRoutine());
@@ -190,7 +190,7 @@ public class StatsUIManager : MonoBehaviour
                 "Status: " + t.Status + "\n\n";
         }
     }
-    // 🔁 SCENE NAVIGATION
+    
     public void goos()
     {
         SceneManager.LoadScene("StatsScene");

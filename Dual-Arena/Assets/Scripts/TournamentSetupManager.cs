@@ -7,8 +7,17 @@ public class TournamentSetupManager : MonoBehaviour
     public TMP_Dropdown playerCountDropdown;
     public TMP_InputField tournName;
 
+    public TextMeshProUGUI stat;
     public void OnNext()
     {
+
+        if (string.IsNullOrWhiteSpace(tournName.text))
+        {
+            stat.text = "Enter tournament name!";
+            return;
+        }
+
+        stat.text = "";
         int count = GetSelectedCount();
 
         GameData.tournamentPlayerCount = count;
@@ -42,7 +51,7 @@ public class TournamentSetupManager : MonoBehaviour
         SceneManager.LoadScene("MainMenu");
     }
 
-    public void bak1    ()
+    public void bak1()
     {
         SceneManager.LoadScene("TournamentSelect");
     }

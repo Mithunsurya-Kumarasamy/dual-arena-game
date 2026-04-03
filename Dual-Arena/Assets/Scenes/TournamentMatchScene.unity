@@ -1392,6 +1392,7 @@ MonoBehaviour:
   rbracketText: {fileID: 1561721131}
   bracketText: {fileID: 1561721131}
   matchInfoText: {fileID: 683806838}
+  nametext: {fileID: 1611484561}
   nextButton: {fileID: 565694192}
   mmButton: {fileID: 1018703352}
   api: {fileID: 618383183}
@@ -1566,7 +1567,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 250, y: 519}
+  m_AnchoredPosition: {x: -331, y: 519}
   m_SizeDelta: {x: 200, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1611484561
@@ -1589,7 +1590,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Tournament Bracket
+  m_text: 'Tournament Name:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1655,7 +1656,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: -471.79102, y: 0, z: 0, w: 0}
+  m_margin: {x: -471.79102, y: 0, z: -1239.1099, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

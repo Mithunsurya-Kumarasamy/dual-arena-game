@@ -88,7 +88,7 @@ public class PlayerStatsUI : MonoBehaviour
             yield break;
         }
 
-        // 🔐 LOGIN
+        
         yield return StartCoroutine(api.Login(username, password));
 
         if (!api.lastLoginSuccess)
@@ -99,13 +99,13 @@ public class PlayerStatsUI : MonoBehaviour
 
         statusText.text = "Login Success";
 
-        // 📊 FETCH DATA
+        
         yield return StartCoroutine(api.GetPlayerStats(username));
         yield return StartCoroutine(api.GetMostUsedMove(username));
         yield return StartCoroutine(api.GetWinRate());
 
         Debug.Log("WINRATE JSON: " + api.winRateJSON);
-        // 📦 PARSE WIN RATE
+        
         float actualWinRate = 0f;
 
         if (!string.IsNullOrEmpty(api.winRateJSON) && api.winRateJSON != "[]")
@@ -122,7 +122,7 @@ public class PlayerStatsUI : MonoBehaviour
             }
         }
 
-        // 📦 PARSE PLAYER STATS
+        
         string json = api.lastPlayerStatsJSON;
 
         Debug.Log("RAW JSON: " + json);
@@ -145,7 +145,7 @@ public class PlayerStatsUI : MonoBehaviour
 
         PlayerStats p = wrapper.array[0];
 
-        // 📦 PARSE MOVE DATA
+        
         string moveJson = api.lastMoveJSON;
         Debug.Log("MOVE JSON: " + moveJson);
 
@@ -164,12 +164,12 @@ public class PlayerStatsUI : MonoBehaviour
             }
         }
 
-        // 🏆 RANK LOGIC
+        
         string rank = "Beginner";
         if (actualWinRate >= 70) rank = "Pro Player";
         else if (actualWinRate >= 50) rank = "Intermediate";
 
-        // 🎨 COLOR CODING
+        
         if (actualWinRate >= 70)
             statsText.color = Color.green;
         else if (actualWinRate >= 50)
@@ -177,7 +177,7 @@ public class PlayerStatsUI : MonoBehaviour
         else
             statsText.color = Color.red;
 
-        // 🖥️ FINAL DISPLAY
+        
         statsText.text =
             "PLAYER PROFILE\n\n" +
             "Username   : " + p.Username + "\n" +

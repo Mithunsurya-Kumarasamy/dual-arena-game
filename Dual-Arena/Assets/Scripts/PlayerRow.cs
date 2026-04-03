@@ -27,7 +27,7 @@ public class PlayerRow : MonoBehaviour
     public void OnLoginClicked()
     {
         if (isLocked) return;
-        Debug.Log("LOGIN CLICKED"); // 👈 ADD THIS
+        Debug.Log("LOGIN CLICKED"); 
 
 
 

@@ -43,7 +43,7 @@ public class PlayerSelectionManager : MonoBehaviour
 
         GeneratePlayerRows(count);
 
-        StartCoroutine(LoadUsers()); // ✅ AFTER rows created
+        StartCoroutine(LoadUsers()); 
 
         nextButton.interactable = false;
     }
@@ -72,7 +72,7 @@ public class PlayerSelectionManager : MonoBehaviour
     {
         GameData.tournamentPlayers = new List<string>(selectedPlayers);
 
-        StartCoroutine(StartTournamentFlow()); // ✅ THIS WAS MISSING
+        StartCoroutine(StartTournamentFlow()); 
     }
 
     IEnumerator StartTournamentFlow()
@@ -88,10 +88,10 @@ public class PlayerSelectionManager : MonoBehaviour
         else if (playerCount == 2)
             GameData.currentRound = 1; 
 
-        // 🔥 CREATE TOURNAMENT FIRST
+        
         yield return StartCoroutine(
             passwordManager.api.CreateTournament(
-                GameData.tournamentName,   // you must store this earlier
+                GameData.tournamentName,   
                 GameData.tournamentPlayerCount
             )
         );
@@ -100,7 +100,7 @@ public class PlayerSelectionManager : MonoBehaviour
 
         Debug.Log("🎯 Tournament ID: " + GameData.currentTournamentID);
 
-        // THEN generate matches
+        
         GenerateBracket();
 
         GameData.tournamentMatchIndex = 0;
@@ -155,7 +155,7 @@ public class PlayerSelectionManager : MonoBehaviour
 
         List<string> players = new List<string>(selectedPlayers);
 
-        // 🔀 shuffle players
+        
         for (int i = 0; i < players.Count; i++)
         {
             string temp = players[i];
@@ -164,7 +164,7 @@ public class PlayerSelectionManager : MonoBehaviour
             players[rand] = temp;
         }
 
-        // 🎯 create matches
+        
         for (int i = 0; i < players.Count; i += 2)
         {
             MatchData match = new MatchData();
@@ -207,7 +207,7 @@ public class PlayerSelectionManager : MonoBehaviour
     }
     public void GoBack()
     {
-        SceneManager.LoadScene("TournamentScene"); // or previous scene
+        SceneManager.LoadScene("TournamentScene"); 
     }
     public void OnPlayerLocked()
     {
@@ -215,13 +215,13 @@ public class PlayerSelectionManager : MonoBehaviour
 
         if (lockedPlayers >= totalPlayers)
         {
-            nextButton.interactable = true; // ✅ enable next
+            nextButton.interactable = true; 
         }
     }
 
     void GeneratePlayerRows(int count)
     {
-        // clear old
+        
         foreach (Transform child in leftColumn) Destroy(child.gameObject);
         foreach (Transform child in rightColumn) Destroy(child.gameObject);
 
@@ -236,11 +236,11 @@ public class PlayerSelectionManager : MonoBehaviour
             PlayerRow row = rowObj.GetComponentInChildren<PlayerRow>();
             row.SetPlayerNumber(i + 1);
 
-            // TEMP usernames
+            
             row.passwordManager = passwordManager;
             row.dropdown.ClearOptions();
             row.manager = this;
-            row.dropdown.ClearOptions(); // leave empty
+            row.dropdown.ClearOptions(); 
 
         }
     }

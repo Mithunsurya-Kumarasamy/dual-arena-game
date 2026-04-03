@@ -92,12 +92,12 @@ public class APIManager : MonoBehaviour
         {
             tournamentStatsJSON = www.downloadHandler.text;
 
-            Debug.Log("RAW JSON: " + tournamentStatsJSON); // ✅ MOVE HERE
+            Debug.Log("RAW JSON: " + tournamentStatsJSON); 
         }
         else
         {
             Debug.LogError("❌ Failed to get tournament stats: " + www.error);
-            tournamentStatsJSON = "[]"; // ✅ PREVENT CRASH
+            tournamentStatsJSON = "[]"; 
         }
     }
 
@@ -302,7 +302,7 @@ public class APIManager : MonoBehaviour
             string json = www.downloadHandler.text;
             Debug.Log("Users: " + json);
 
-            // convert JSON → list
+            
             UserListWrapper wrapper = JsonUtility.FromJson<UserListWrapper>("{\"users\":" + json + "}");
 
             fetchedUsers.Clear();

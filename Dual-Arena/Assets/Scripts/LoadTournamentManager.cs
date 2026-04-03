@@ -40,6 +40,8 @@ public class LoadTournamentManager : MonoBehaviour
 
         GameData.currentTournamentID = tournamentIDs[index];
 
+        GameData.tournamentName = dropdown.options[index].text;
+
         Debug.Log("Selected Tournament ID: " + GameData.currentTournamentID);
 
         SceneManager.LoadScene("TournamentMatchScene");

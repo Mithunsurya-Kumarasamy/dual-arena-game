@@ -6,12 +6,15 @@ public class PasswordManager : MonoBehaviour
     public GameObject panel;
     public TMP_InputField inputField;
 
+    public TextMeshProUGUI stat;
+
     PlayerRow currentRow;
 
     public void Open(PlayerRow row)
     {
         panel.SetActive(true);
         inputField.text = "";
+        stat.text = "";
         currentRow = row;
     }
 
@@ -23,6 +26,13 @@ public class PasswordManager : MonoBehaviour
         string entered = inputField.text;
         string username = currentRow.GetSelectedUsername();
 
+
+        if (string.IsNullOrWhiteSpace(entered))
+        {
+            stat.text = "Enter password!";
+            return;
+        }   
+        stat.text = "Loading...";
         StartCoroutine(LoginRoutine(username, entered));
     }
 
@@ -37,7 +47,8 @@ public class PasswordManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("Wrong password");
+            stat.text = "Incorrect Password Entered!";
+            yield break;
         }
     }
     public void Close()
