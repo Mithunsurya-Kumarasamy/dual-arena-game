@@ -128,6 +128,7 @@ public class RoundManager : MonoBehaviour
 
     void ShowResult(string winnerName)
     {
+        Debug.Log("🔥 CALLING SaveTournamentMatch");
         StartCoroutine(api.SaveMatchWithRounds(
             GameData.player1Name,
             GameData.player2Name,
@@ -137,20 +138,26 @@ public class RoundManager : MonoBehaviour
         ));
         resultPanel.SetActive(true);
 
-        resultText.text = winnerName + " WINS!";
+        resultText.text = "WINNER: " + winnerName ;
 
-        statsText.text =
+        statsText.text = "HP Remaining: " +
             GameData.player1Name + ": " + player1HP + "\n" +
             GameData.player2Name + ": " + player2HP;
         GameData.lastWinner = winnerName;
-        GameData.winnerProcessed = false; // 🔥 reset flag
-        // 🔥 TOURNAMENT MODE LOGIC
+        GameData.winnerProcessed = false; 
+        
         if (GameData.isTournamentMode)
         {
-            GameData.lastWinner = winnerName;
 
+            GameData.lastWinner = winnerName;
+            
+            StartCoroutine(api.SaveTournamentMatch(
+                GameData.currentTournamentID,
+                GameData.tournamentMatchIndex,
+                winnerName
+            ));
             playAgainButton.SetActive(false);
-            mainMenuButton.SetActive(false);
+            mainMenuButton.SetActive(true);
             nextMatchButton.SetActive(true);
             MapSelectButton.SetActive(false);
         }
@@ -229,11 +236,11 @@ public class RoundManager : MonoBehaviour
 
     IEnumerator ResolveRound(int p1Move, int p2Move)
     {
-        p1MoveText.text = GameData.player1Name + ": " + MoveName(p1Move);
+        p1MoveText.text = GameData.player1Name + " chooses " + MoveName(p1Move);
         yield return new WaitForSeconds(1f);
-        p2MoveText.text = GameData.player2Name + ": " + MoveName(p2Move);
+        p2MoveText.text = GameData.player2Name + " chooses " + MoveName(p2Move);
 
-        statusText.text = ""; // clear bottom
+        statusText.text = ""; 
 
         yield return new WaitForSeconds(2f);
 
@@ -253,12 +260,12 @@ public class RoundManager : MonoBehaviour
         ApplyDamage(winner, p1Move, p2Move);
 
         yield return new WaitForSeconds(1.5f);
-        // 🔥 SAVE ROUND DATA
+        
         RoundDataSend round = new RoundDataSend();
         round.roundNumber = roundNumber;
         round.moves = new List<MoveDataSend>();
 
-        // Player 1
+        
         round.moves.Add(new MoveDataSend
         {
             player = GameData.player1Name,
@@ -266,7 +273,7 @@ public class RoundManager : MonoBehaviour
             damage = lastP1Damage
         });
 
-        // Player 2
+        
         round.moves.Add(new MoveDataSend
         {
             player = GameData.player2Name,
@@ -284,24 +291,24 @@ public class RoundManager : MonoBehaviour
         string p1 = GameData.player1Name;
         string p2 = GameData.player2Name;
 
-        // Draw
+        
         if (winner == 0)
         {
             statusText.text = "Same moves!\nNo HP loss!";
             return;
         }
 
-        // Player1 wins
+        
         if (winner == 1)
         {
-            if (p1Move == 0) // Light
+            if (p1Move == 0) 
                 statusText.text = p1 + " lands a quick strike on " + p2;
-            else if (p1Move == 1) // Heavy
+            else if (p1Move == 1) 
                 statusText.text = p1 + " delivers a powerful blow on " + p2;
-            else if (p1Move == 2) // Block
+            else if (p1Move == 2) 
                 statusText.text = p1 + " perfectly defends!";
         }
-        // Player2 wins
+        
         else if (winner == 2)
         {
             if (p2Move == 0)
@@ -319,7 +326,7 @@ public class RoundManager : MonoBehaviour
 
         float t = 0;
 
-        // MOVE
+        
         while (t < 1)
         {
             t += Time.deltaTime * 4;
@@ -329,10 +336,10 @@ public class RoundManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
 
-        // ATTACK
+        
         TriggerMove(anim, move);
 
-        // HIT SYNC
+        
         if (targetToHit != null)
         {
             yield return new WaitForSeconds(0.2f);
@@ -341,7 +348,7 @@ public class RoundManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.8f);
 
-        // RETURN
+        
         t = 0;
         while (t < 1)
         {
@@ -353,10 +360,10 @@ public class RoundManager : MonoBehaviour
 
     void PlayAnimations(int p1Move, int p2Move, int winner)
     {
-        // SHOW SHIELDS
-        // SHOW BLOCK ONLY WHEN VALID
+        
+        
 
-        // block vs block
+        
         if (p1Move == 2 && p2Move == 2)
         {
             p1Shield.SetActive(true);
@@ -366,7 +373,7 @@ public class RoundManager : MonoBehaviour
             Invoke(nameof(HideP2Shield), 1.2f);
         }
 
-        // heavy vs block (block works)
+        
         else if (p1Move == 1 && p2Move == 2)
         {
             p2Shield.SetActive(true);
@@ -378,8 +385,8 @@ public class RoundManager : MonoBehaviour
             Invoke(nameof(HideP1Shield), 1.2f);
         }
 
-        // ❌ DO NOT SHOW BLOCK for light vs block
-        // BLOCK vs BLOCK
+        
+        
         if (p1Move == 2 && p2Move == 2)
         {
             p1Anim.SetTrigger("Block");
@@ -387,7 +394,7 @@ public class RoundManager : MonoBehaviour
             return;
         }
 
-        // HEAVY vs BLOCK
+        
         if (p1Move == 1 && p2Move == 2)
         {
             StartCoroutine(MoveAttackReturn(p1Transform, p1Anim, 1, p1StartPos, 1, 6.5f, null));
@@ -402,7 +409,7 @@ public class RoundManager : MonoBehaviour
             return;
         }
 
-        // LIGHT vs HEAVY → ONLY HEAVY
+        
         if (p1Move == 0 && p2Move == 1)
         {
             StartCoroutine(MoveAttackReturn(p2Transform, p2Anim, 1, p2StartPos, -1, 6.5f, p1Anim));
@@ -415,7 +422,7 @@ public class RoundManager : MonoBehaviour
             return;
         }
 
-        // SAME MOVE
+        
         if (p1Move == p2Move)
         {
             StartCoroutine(MoveAttackReturn(p1Transform, p1Anim, p1Move, p1StartPos, 1, 3.5f, null));
@@ -423,7 +430,7 @@ public class RoundManager : MonoBehaviour
             return;
         }
 
-        // DEFAULT → WINNER ONLY
+        
         if (winner == 1)
         {
             StartCoroutine(MoveAttackReturn(p1Transform, p1Anim, p1Move, p1StartPos, 1, 6.5f, p2Anim));
@@ -446,12 +453,12 @@ public class RoundManager : MonoBehaviour
 
     void ApplyDamage(int winner, int p1Move, int p2Move)
     {
-        int lightDamage = Random.Range(8, 15);
-        int heavyDamage = Random.Range(20, 30);
-        int blockReflect = Random.Range(7, 13);
+        int lightDamage = Random.Range(18, 25);
+        int heavyDamage = Random.Range(27, 35);
+        int blockReflect = Random.Range(12, 17);
 
-        // 🔥 HEAVY vs BLOCK (REFLECT DAMAGE)
-        // HEAVY vs BLOCK
+        
+        
         if (p1Move == 1 && p2Move == 2)
         {
             lastP1Damage = 0;
@@ -472,29 +479,29 @@ public class RoundManager : MonoBehaviour
             return;
         }
 
-        // NORMAL DAMAGE
+        
         lastP1Damage = 0;
         lastP2Damage = 0;
 
         if (winner == 1)
         {
             if (p1Move == 1)
-            { 
+            {
                 DamagePlayer2(heavyDamage);
             }
             else if (p1Move == 0)
-            { 
+            {
                 DamagePlayer2(lightDamage);
             }
         }
         else if (winner == 2)
         {
             if (p2Move == 1)
-            { 
+            {
                 DamagePlayer1(heavyDamage);
             }
             else if (p2Move == 0)
-            { 
+            {
                 DamagePlayer1(lightDamage);
             }
         }
@@ -507,7 +514,7 @@ public class RoundManager : MonoBehaviour
         int actualDamage = Mathf.Min(dmg, player1HP);
         player1HP -= actualDamage;
 
-        // 🔥 IMPORTANT
+        
         lastP2Damage = actualDamage;
 
         statusText.text += "\n-" + actualDamage + " HP for " + p1;
@@ -519,7 +526,7 @@ public class RoundManager : MonoBehaviour
         int actualDamage = Mathf.Min(dmg, player2HP);
         player2HP -= actualDamage;
 
-        // 🔥 IMPORTANT
+        
         lastP1Damage = actualDamage;
 
         statusText.text += "\n-" + actualDamage + " HP for " + p2;

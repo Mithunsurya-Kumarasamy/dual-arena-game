@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
@@ -16,33 +18,144 @@ public class PlayerSelectionManager : MonoBehaviour
     private int lockedPlayers = 0;
 
     public Button nextButton;
+    [System.Serializable]
+    public class MatchSend
+    {
+        public string player1;
+        public string player2;
+        public int roundNumber;
+        public int matchOrder;
+    }
+
+    [System.Serializable]
+    public class MatchWrapper
+    {
+        public List<MatchSend> matches;
+    }
     void Start()
     {
+
+
         int count = GameData.tournamentPlayerCount;
         if (count == 0) count = 4;
+
         totalPlayers = count;
 
         GeneratePlayerRows(count);
 
-        nextButton.interactable = false; // ❌ disabled initially
+        StartCoroutine(LoadUsers()); 
+
+        nextButton.interactable = false;
     }
 
+    IEnumerator LoadUsers()
+    {
+        yield return StartCoroutine(passwordManager.api.GetUsers());
+
+        Debug.Log("Users loaded: " + passwordManager.api.fetchedUsers.Count);
+
+        PopulateDropdowns(passwordManager.api.fetchedUsers);
+    }
+    void PopulateDropdowns(List<string> users)
+    {
+        foreach (Transform col in new[] { leftColumn, rightColumn })
+        {
+            foreach (Transform row in col)
+            {
+                PlayerRow r = row.GetComponentInChildren<PlayerRow>();
+                r.dropdown.ClearOptions();
+                r.dropdown.AddOptions(users);
+            }
+        }
+    }
     public void OnNextPressed()
     {
         GameData.tournamentPlayers = new List<string>(selectedPlayers);
 
-        GenerateBracket();
-
-        UnityEngine.SceneManagement.SceneManager.LoadScene("TournamentMatchScene");
+        StartCoroutine(StartTournamentFlow()); 
     }
 
+    IEnumerator StartTournamentFlow()
+    {
+        int playerCount = GameData.tournamentPlayers.Count;
+
+        if (playerCount == 16)
+            GameData.currentRound = 4;
+        else if (playerCount == 8)
+            GameData.currentRound = 3;
+        else if (playerCount == 4)
+            GameData.currentRound = 2;
+        else if (playerCount == 2)
+            GameData.currentRound = 1; 
+
+        
+        yield return StartCoroutine(
+            passwordManager.api.CreateTournament(
+                GameData.tournamentName,   
+                GameData.tournamentPlayerCount
+            )
+        );
+
+        GameData.currentTournamentID = passwordManager.api.createdTournamentID;
+
+        Debug.Log("🎯 Tournament ID: " + GameData.currentTournamentID);
+
+        
+        GenerateBracket();
+
+        GameData.tournamentMatchIndex = 0;
+
+        yield return StartCoroutine(SendTournamentMatches());
+
+        SceneManager.LoadScene("TournamentMatchScene");
+    }
+    IEnumerator SendTournamentMatches()
+    {
+        List<MatchSend> matchList = new List<MatchSend>();
+
+        for (int i = 0; i < GameData.tournamentMatches.Count; i++)
+        {
+            var m = GameData.tournamentMatches[i];
+
+            MatchSend data = new MatchSend();
+            data.player1 = m.player1;
+            data.player2 = m.player2;
+            data.roundNumber = GameData.currentRound;
+            data.matchOrder = i;
+
+            matchList.Add(data);
+        }
+
+        MatchWrapper wrapper = new MatchWrapper();
+        wrapper.matches = matchList;
+
+        string json = JsonUtility.ToJson(wrapper);
+
+        WWWForm form = new WWWForm();
+        form.AddField("tournamentId", GameData.currentTournamentID);
+        form.AddField("matches", json);
+
+        UnityWebRequest www = UnityWebRequest.Post(
+            "http://localhost:3000/tournament/createMatches", form);
+
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("✅ Matches saved to DB");
+        }
+        else
+        {
+            Debug.LogError("❌ Failed to save matches: " + www.error);
+        }
+    }
     void GenerateBracket()
     {
         GameData.tournamentMatches.Clear();
 
         List<string> players = new List<string>(selectedPlayers);
 
-        // 🔀 shuffle players
+        
         for (int i = 0; i < players.Count; i++)
         {
             string temp = players[i];
@@ -51,7 +164,7 @@ public class PlayerSelectionManager : MonoBehaviour
             players[rand] = temp;
         }
 
-        // 🎯 create matches
+        
         for (int i = 0; i < players.Count; i += 2)
         {
             MatchData match = new MatchData();
@@ -79,15 +192,22 @@ public class PlayerSelectionManager : MonoBehaviour
     {
         registerPanel.SetActive(true);
     }
-
+    IEnumerator RefreshDelay()
+    {
+        yield return new WaitForSeconds(0.5f);
+        StartCoroutine(LoadUsers());
+    }
     public void CloseRegister()
     {
         registerPanel.SetActive(false);
     }
-
+    public void RefreshUsers()
+    {
+        StartCoroutine(LoadUsers());
+    }
     public void GoBack()
     {
-        SceneManager.LoadScene("TournamentScene"); // or previous scene
+        SceneManager.LoadScene("TournamentScene"); 
     }
     public void OnPlayerLocked()
     {
@@ -95,13 +215,13 @@ public class PlayerSelectionManager : MonoBehaviour
 
         if (lockedPlayers >= totalPlayers)
         {
-            nextButton.interactable = true; // ✅ enable next
+            nextButton.interactable = true; 
         }
     }
 
     void GeneratePlayerRows(int count)
     {
-        // clear old
+        
         foreach (Transform child in leftColumn) Destroy(child.gameObject);
         foreach (Transform child in rightColumn) Destroy(child.gameObject);
 
@@ -116,21 +236,11 @@ public class PlayerSelectionManager : MonoBehaviour
             PlayerRow row = rowObj.GetComponentInChildren<PlayerRow>();
             row.SetPlayerNumber(i + 1);
 
-            // TEMP usernames
+            
             row.passwordManager = passwordManager;
             row.dropdown.ClearOptions();
             row.manager = this;
-            row.dropdown.AddOptions(new List<string>
-            {
-                "Ashwin",
-                "Mithun",
-                "Player3",
-                "Player4",
-                "Player5",
-                "Player6",
-                "Player7",
-                "Player8"
-            });
+            row.dropdown.ClearOptions(); 
 
         }
     }

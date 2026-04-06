@@ -51,21 +51,20 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\PlayerSelectionManager.cs" />
     <Compile Include="Assets\Scripts\PlayerRow.cs" />
+    <Compile Include="Assets\Scripts\AboutManager.cs" />
     <Compile Include="Assets\Scripts\MapSelectionManager.cs" />
     <Compile Include="Assets\Scripts\StatsUIManager.cs" />
     <Compile Include="Assets\Scripts\APIManager.cs" />
-    <Compile Include="Assets\Scripts\RoundSimulator.cs" />
     <Compile Include="Assets\Scripts\MoveSelectionManager.cs" />
+    <Compile Include="Assets\Scripts\LoadTournamentManager.cs" />
     <Compile Include="Assets\Scripts\MatchData.cs" />
     <Compile Include="Assets\Scripts\TournamentSetupManager.cs" />
     <Compile Include="Assets\Scripts\TournamentBracketManager.cs" />
     <Compile Include="Assets\Scripts\HowToPlay.cs" />
     <Compile Include="Assets\Scripts\PlayerStatsUI.cs" />
     <Compile Include="Assets\Scripts\UserData.cs" />
-    <Compile Include="Assets\Scripts\IdleBreathing.cs" />
     <Compile Include="Assets\Scripts\UserManager.cs" />
     <Compile Include="Assets\Scripts\RoundManager.cs" />
-    <Compile Include="Assets\Scripts\DualController.cs" />
     <Compile Include="Assets\Scripts\LoginManager.cs" />
     <Compile Include="Assets\Scripts\JsonHelper.cs" />
     <Compile Include="Assets\Scripts\RegisterManager.cs" />

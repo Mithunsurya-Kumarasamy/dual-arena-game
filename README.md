@@ -1,27 +1,46 @@
-# Dual Arena Game
 
-## Setup Instructions
+# 🎮 Duel Arena
 
-### 1. Database
-- Open MySQL
-- Run:
-  database/database.sql
+A turn-based fighting game built using **Unity + Node.js + MySQL**, featuring tournaments, player stats, and match history.
 
-### 2. Backend
-cd backend
-npm install
+## 🚀 Features
+
+- ⚔️ 1v1 turn-based combat system  
+- 🏆 Tournament system (4 / 8 / 16 players)  
+- 📊 Player statistics  
+- 🗺️ Multiple maps  
+- 🔐 Login system  
+
+## 📦 Installation
+
+### Clone repo
+    git clone https://github.com/your-username/duel-arena.git
+    cd duel-arena
+
+### Setup DB
+Run:
+    database/database.sql
+
+### Backend
+    cd backend
+    npm install
+
+Create `.env`:
+
+    DB_HOST=localhost
+    DB_USER=your_user
+    DB_PASSWORD=your_password
+    DB_NAME=DuelArenaDB
+
+Run:
+```
 node server.js
+```
 
-### 3. Unity
-- Open project in Unity Hub
-- Press Play
+## 🎮 How to Play
 
-## Features
-- 1v1 battle system
-- Tournament mode
-- Player stats (win rate, moves)
-- Backend API (Node.js + MySQL)
+1. Register  
+2. Login  
+3. Play  
 
-## Notes
-- Make sure MySQL is running
-- Update DB credentials in backend/db.js if needed
+```

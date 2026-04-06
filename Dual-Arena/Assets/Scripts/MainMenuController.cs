@@ -18,7 +18,7 @@ public class MainMenuController : MonoBehaviour
         GameData.tournamentFinished = false;
         GameData.tournamentMatches.Clear();
         GameData.tournamentPlayers.Clear();
-        SceneManager.LoadScene("TournamentScene");
+        SceneManager.LoadScene("TournamentSelect");
         GameData.isTournamentMode = true;
     }
 
@@ -27,7 +27,15 @@ public class MainMenuController : MonoBehaviour
         Debug.Log("Button pressed");
         SceneManager.LoadScene("PreStat");
     }
+    public void LoadHTP()
+    {
+        SceneManager.LoadScene("HowToPlay");
+    }
 
+    public void LoadAbout()
+    {
+        SceneManager.LoadScene("AboutScene");
+    }
     public void ExitGame()
     {
         Application.Quit();

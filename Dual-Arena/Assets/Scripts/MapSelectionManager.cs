@@ -16,13 +16,13 @@ public class MapSelectionManager : MonoBehaviour
         GameData.selectedMap = index;
         selectedMap = index;
 
-        // 1. TURN OFF ALL
+        
         for (int i = 0; i < highlights.Length; i++)
         {
             highlights[i].SetActive(false);
         }
 
-        // 2. TURN ON SELECTED
+        
         highlights[index].SetActive(true);
 
         statusText.text = "Selected Map: " + mapsname[index];

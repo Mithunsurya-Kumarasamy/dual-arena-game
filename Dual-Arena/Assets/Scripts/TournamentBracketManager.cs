@@ -1,6 +1,8 @@
 using UnityEngine;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 public class TournamentBracketManager : MonoBehaviour
@@ -10,28 +12,145 @@ public class TournamentBracketManager : MonoBehaviour
     public TextMeshProUGUI bracketText;
     public TextMeshProUGUI matchInfoText;
 
+    public TextMeshProUGUI nametext;
+
     public GameObject nextButton;
     public GameObject mmButton;
 
+    public APIManager api;
 
-    void Start()
+    IEnumerator Start()
     {
-        HandleWinnerReturn();
-        if (GameData.tournamentFinished)
+
+        nametext.text = "Tournament Name: " + GameData.tournamentName;
+        yield return StartCoroutine(api.GetTournamentMatches(GameData.currentTournamentID));
+
+        if (api.fetchedMatches == null || api.fetchedMatches.Count == 0)
         {
-            nextButton.SetActive(false);
-            mmButton.SetActive(true);
-            bracketText.text = "Tournament Over!";
-            matchInfoText.text = "CHAMPION: " + GameData.tournamentWinner;
-            return;
+            Debug.LogError("❌ No matches found in DB");
+            yield break;
         }
 
+        
+        GameData.tournamentMatches.Clear();
+
+        
+        int latestRound = -1;
+
+        foreach (var m in api.fetchedMatches)
+        {
+            if (m.RoundNumber > latestRound)
+                latestRound = m.RoundNumber;
+        }
+        GameData.currentRound = latestRound;
+
+        
+        foreach (var m in api.fetchedMatches)
+        {
+            if (m.RoundNumber == latestRound)
+            {
+                MatchData match = new MatchData();
+                match.player1 = m.Player1;
+                match.player2 = m.Player2;
+                match.winner = m.Winner;
+
+                GameData.tournamentMatches.Add(match);
+            }
+        }
+
+        
+        HashSet<string> players = new HashSet<string>();
+
+        foreach (var m in GameData.tournamentMatches)
+        {
+            players.Add(m.player1);
+            players.Add(m.player2);
+        }
+
+        GameData.tournamentPlayers = new List<string>(players);
+        
+
+        GameData.tournamentMatchIndex = 0;
+
+        
+        for (int i = 0; i < GameData.tournamentMatches.Count; i++)
+        {
+            if (string.IsNullOrEmpty(GameData.tournamentMatches[i].winner))
+            {
+                GameData.tournamentMatchIndex = i;
+                break;
+            }
+
+            
+            GameData.tournamentMatchIndex = GameData.tournamentMatches.Count;
+        }
+
+        
+        
+        if (GameData.tournamentMatchIndex >= GameData.tournamentMatches.Count)
+        {
+            bool nextRoundExists = false;
+
+            foreach (var m in api.fetchedMatches)
+            {
+                if (m.RoundNumber == GameData.currentRound - 1)
+                {
+                    nextRoundExists = true;
+                    break;
+                }
+            }
+
+            if (!nextRoundExists)
+            {
+                Debug.Log("🔥 Generating next round (LOAD)");
+                GenerateNextRound();
+            }
+            else
+            {
+                Debug.Log("✅ Next round already exists → loading it");
+
+                GameData.currentRound--;
+
+                GameData.tournamentMatches.Clear();
+
+                foreach (var m in api.fetchedMatches)
+                {
+                    if (m.RoundNumber == GameData.currentRound)
+                    {
+                        MatchData match = new MatchData();
+                        match.player1 = m.Player1;
+                        match.player2 = m.Player2;
+                        match.winner = m.Winner;
+
+                        GameData.tournamentMatches.Add(match);
+                    }
+                }
+            }
+
+            GameData.tournamentMatchIndex = 0;
+        }
+        
+        if (GameData.tournamentMatches.Count == 1 &&
+            !string.IsNullOrEmpty(GameData.tournamentMatches[0].winner))
+        {
+            GameData.tournamentFinished = true;
+            GameData.tournamentWinner = GameData.tournamentMatches[0].winner;
+
+            nextButton.SetActive(false);
+
+            bracketText.text = "Tournament Over!";
+            matchInfoText.text = "CHAMPION: " + GameData.tournamentWinner;
+
+            yield break; 
+        }
+
+        
         DisplayBracket();
         UpdateCurrentMatch();
     }
     void HandleWinnerReturn()
     {
-        if (GameData.tournamentFinished) return; // 🛑 STOP HERE
+        if (GameData.tournamentFinished) return; 
 
         if (string.IsNullOrEmpty(GameData.lastWinner)) return;
 
@@ -41,7 +160,11 @@ public class TournamentBracketManager : MonoBehaviour
     }
     public void RecordWinner(string winner)
     {
-        GameData.tournamentMatches[GameData.tournamentMatchIndex].winner = winner;
+        var match = GameData.tournamentMatches[GameData.tournamentMatchIndex];
+
+        match.winner = winner;
+
+        Debug.Log("✅ Winner set for: " + match.player1 + " vs " + match.player2);
 
         GameData.tournamentMatchIndex++;
 
@@ -56,6 +179,7 @@ public class TournamentBracketManager : MonoBehaviour
 
         Debug.Log("Match Index: " + GameData.tournamentMatchIndex);
         Debug.Log("Total Matches: " + GameData.tournamentMatches.Count);
+        GameData.winnerProcessed = true;
     }
     void GenerateNextRound()
     {
@@ -66,12 +190,12 @@ public class TournamentBracketManager : MonoBehaviour
             winners.Add(match.winner);
         }
 
-        // 🏆 FINAL WINNER
+        
         if (winners.Count == 1)
         {
             Debug.Log("TOURNAMENT WINNER: " + winners[0]);
 
-            GameData.tournamentWinner = winners[0]; // ✅ STORE CORRECTLY
+            GameData.tournamentWinner = winners[0]; 
             GameData.tournamentFinished = true;
 
             return;
@@ -86,15 +210,54 @@ public class TournamentBracketManager : MonoBehaviour
 
             GameData.tournamentMatches.Add(m);
         }
+        GameData.currentRound--;
+        StartCoroutine(SendNextRoundToDB());
 
         GameData.tournamentPlayers = winners;
     }
-    string GetRoundName(int totalPlayers)
+
+    IEnumerator SendNextRoundToDB()
     {
-        if (totalPlayers == 16) return "Round of 16";
-        if (totalPlayers == 8) return "Quarter Final";
-        if (totalPlayers == 4) return "Semi Final";
-        if (totalPlayers == 2) return "Final";
+        List<PlayerSelectionManager.MatchSend> matchList = new List<PlayerSelectionManager.MatchSend>();
+
+        for (int i = 0; i < GameData.tournamentMatches.Count; i++)
+        {
+            var m = GameData.tournamentMatches[i];
+
+            PlayerSelectionManager.MatchSend data = new PlayerSelectionManager.MatchSend();
+            data.player1 = m.player1;
+            data.player2 = m.player2;
+            data.roundNumber = GameData.currentRound; 
+            data.matchOrder = i;
+
+            matchList.Add(data);
+        }
+
+        PlayerSelectionManager.MatchWrapper wrapper = new PlayerSelectionManager.MatchWrapper();
+        wrapper.matches = matchList;
+
+        string json = JsonUtility.ToJson(wrapper);
+
+        WWWForm form = new WWWForm();
+        form.AddField("tournamentId", GameData.currentTournamentID);
+        form.AddField("matches", json);
+
+        UnityWebRequest www = UnityWebRequest.Post(
+            "http://localhost:3000/tournament/createMatches", form);
+
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+            Debug.Log("✅ Next round saved");
+        else
+            Debug.LogError("❌ Failed to save next round");
+    }
+    string GetRoundName(int roundNumber)
+    {
+        if (roundNumber == 4) return "Round of 16";
+        if (roundNumber == 3) return "Quarter Final";
+        if (roundNumber == 2) return "Semi Final";
+        if (roundNumber == 1) return "Final";
 
         return "Match";
     }
@@ -103,6 +266,8 @@ public class TournamentBracketManager : MonoBehaviour
     {
         foreach (var match in GameData.tournamentMatches)
         {
+            Debug.Log("Checking winner: " + match.winner);
+
             if (string.IsNullOrEmpty(match.winner))
                 return false;
         }
@@ -111,16 +276,16 @@ public class TournamentBracketManager : MonoBehaviour
     void DisplayBracket()
     {
         int total = GameData.tournamentPlayers.Count;
-        string roundName = GetRoundName(total);
+        string roundName = GetRoundName(GameData.currentRound);
 
-        // Clear all
+        
         lbracketText.text = "";
         rbracketText.text = "";
         bracketText.text = roundName + "\n\n";
 
         int matchCount = GameData.tournamentMatches.Count;
 
-        // FINAL → center only
+        
         if (matchCount == 1)
         {
             var match = GameData.tournamentMatches[0];
@@ -132,7 +297,7 @@ public class TournamentBracketManager : MonoBehaviour
             return;
         }
 
-        // SPLIT LEFT & RIGHT
+        
         int half = matchCount / 2;
 
 
@@ -161,7 +326,19 @@ public class TournamentBracketManager : MonoBehaviour
     void UpdateCurrentMatch()
     {
         int total = GameData.tournamentPlayers.Count;
-        string roundName = GetRoundName(total);
+        string roundName = GetRoundName(GameData.currentRound);
+
+        if (GameData.tournamentMatches == null || GameData.tournamentMatches.Count == 0)
+        {
+            Debug.LogError("❌ No matches available");
+            return;
+        }
+
+        if (GameData.tournamentMatchIndex >= GameData.tournamentMatches.Count)
+        {
+            Debug.LogError("❌ Index out of range: " + GameData.tournamentMatchIndex);
+            return;
+        }
 
         var match = GameData.tournamentMatches[GameData.tournamentMatchIndex];
 
@@ -172,7 +349,7 @@ public class TournamentBracketManager : MonoBehaviour
     string GetColoredName(string player, string winner)
     {
         if (string.IsNullOrEmpty(winner))
-            return player; // not played yet
+            return player; 
 
         if (player == winner)
             return "<color=green>" + player + "</color>";

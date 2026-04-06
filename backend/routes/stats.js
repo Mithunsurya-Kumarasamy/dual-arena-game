@@ -46,11 +46,13 @@ router.get("/mostPlayedMap", (req, res) => {
 router.get("/tournamentStats", (req, res) => {
     db.query("CALL GetTournamentStats()", (err, result) => {
         if (err) {
-            console.log(err);
-            res.send([]);
-        } else {
-            res.send(result[0]);
+            console.log("❌ PROC ERROR:", err);
+            return res.status(500).send([]);
         }
+
+        console.log("PROC RESULT:", result); // 👈 DEBUG
+
+        res.json(result[0]); // ✅ MUST BE result[0]
     });
 });
 
@@ -93,5 +95,6 @@ router.get("/mostUsedMove/:username", (req, res) => {
         }
     });
 });
+
 
 module.exports = router;
