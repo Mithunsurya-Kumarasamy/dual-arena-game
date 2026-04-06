@@ -57,6 +57,25 @@ public class APIManager : MonoBehaviour
 
     public List<TournamentMatch> fetchedMatches = new List<TournamentMatch>();
 
+    public string rulesJSON;
+
+    public IEnumerator GetRules(string type)
+    {
+        UnityWebRequest www =
+            UnityWebRequest.Get("http://localhost:3000/rules/" + type);
+
+        yield return www.SendWebRequest();
+
+        if (www.result == UnityWebRequest.Result.Success)
+        {
+            rulesJSON = www.downloadHandler.text;
+        }
+        else
+        {
+            Debug.LogError("Failed to fetch rules");
+        }
+    }
+
     public IEnumerator GetTournamentMatches(int tournamentId)
     {
         UnityWebRequest www = UnityWebRequest.Get(
@@ -92,12 +111,12 @@ public class APIManager : MonoBehaviour
         {
             tournamentStatsJSON = www.downloadHandler.text;
 
-            Debug.Log("RAW JSON: " + tournamentStatsJSON); 
+            Debug.Log("RAW JSON: " + tournamentStatsJSON);
         }
         else
         {
             Debug.LogError("❌ Failed to get tournament stats: " + www.error);
-            tournamentStatsJSON = "[]"; 
+            tournamentStatsJSON = "[]";
         }
     }
 
@@ -302,7 +321,7 @@ public class APIManager : MonoBehaviour
             string json = www.downloadHandler.text;
             Debug.Log("Users: " + json);
 
-            
+
             UserListWrapper wrapper = JsonUtility.FromJson<UserListWrapper>("{\"users\":" + json + "}");
 
             fetchedUsers.Clear();
